@@ -1,0 +1,17 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t wildanazz/client -f ./client/Dockerfile.dev ./client
+script:
+  - docker run --env CI=true wildanazz/client npm run test
+after_success:
+  - docker build -t wildanazz/multi-client ./client
+  - docker build -t wildanazz/multi-nginx ./nginx
+  - docker build -t wildanazz/multi-server ./server
+  - docker build -t wildanazz/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push wildanazz/multi-client
+  - docker push wildanazz/multi-nginx
+  - docker push wildanazz/multi-server
+  - docker push wildanazz/multi-worker  
